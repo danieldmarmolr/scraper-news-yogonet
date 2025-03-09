@@ -20,12 +20,14 @@ RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add
 RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
 RUN apt-get update && apt-get install -y google-chrome-stable
 
-# Install a specific version of ChromeDriver (e.g., version 114.0.5735.90)
-RUN wget -q https://storage.googleapis.com/chrome-for-testing-public/114.0.5735.90/linux64/chromedriver-linux64.zip \
-    && unzip chromedriver-linux64.zip \
-    && mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver \
-    && chmod +x /usr/local/bin/chromedriver \
-    && rm chromedriver-linux64.zip
+# Install the latest version of ChromeDriver
+RUN LATEST_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE) \
+    && wget -q "https://chromedriver.storage.googleapis.com/${LATEST_VERSION}/chromedriver_linux64.zip" \
+    && unzip chromedriver_linux64.zip -d /usr/local/bin/ \
+    && rm chromedriver_linux64.zip
+
+# Verify the architecture of ChromeDriver
+RUN file /usr/local/bin/chromedriver
 
 # Copy the requirements file into the container
 COPY requirements.txt .
@@ -38,7 +40,7 @@ COPY . .
 
 # Set environment variables for BigQuery authentication and ChromeDriver
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
-ENV CHROMEDRIVER_PATH="/usr/local/bin/chromedriver"
+# ENV CHROMEDRIVER_PATH="/usr/local/bin/chromedriver"
 
 # Command to run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
