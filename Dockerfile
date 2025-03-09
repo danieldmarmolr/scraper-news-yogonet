@@ -18,8 +18,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code into the container
 COPY . .
 
-# Set the environment variable for the port
-ENV PORT 8080
+# Set environment variables for BigQuery authentication
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
 
 # Command to run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
