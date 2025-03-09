@@ -1,8 +1,11 @@
+from fastapi import FastAPI
 
-    pip install selenium pandas webdriver-manager
+import sys; sys.path.append('.')
+from pipeline import main
+app = FastAPI()
 
-    from selenium import webdriver
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.chrome.service import Service
-    from selenium.webdriver.common.action_chains import ActionChains
-    
+
+@app.get("/")
+def read_root():
+    main()
+    return 'OK'

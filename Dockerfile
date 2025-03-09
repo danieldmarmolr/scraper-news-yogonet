@@ -18,4 +18,4 @@ COPY . .
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
 
 # Run the main script when the container starts
-CMD ["python", "main.py"]
+CMD ["uvicorn","--bind","0.0.0.0","--port","8080","app:app"]

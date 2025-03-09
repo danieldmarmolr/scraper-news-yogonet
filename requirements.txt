@@ -3,3 +3,4 @@ pandas
 selenium
 textblob
 google-cloud-bigquery
+fastapi

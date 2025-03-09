@@ -40,6 +40,7 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
     print("Eliminando datos existentes...")
     query_job = client.query(query)
     query_job.result()  # Esperar a que termine la operación
+    dataframe["Date"] = pd.to_datetime(dataframe["Date"])
     print("Datos eliminados correctamente")
     
     # Subir los datos del DataFrame
@@ -249,7 +250,7 @@ def post_process_data(df):
 
 def main():
     """Main function to run the pipeline."""
-    '''# Call the function and display the list of URLs
+    # Call the function and display the list of URLs
     urls = get_category_links()
 
     # Initialize an empty DataFrame to store combined results
@@ -261,14 +262,13 @@ def main():
 
     combined_df = post_process_data(combined_df)
 
-    # Save the DataFrame to a CSV file
+    ''' # Save the DataFrame to a CSV file
     file_path = os.path.join(os.getcwd(), 'combined_news_data.csv')
     combined_df.to_csv(file_path, encoding='utf-8-sig', index=False)
-    '''
-    combined_df = pd.read_csv("combined_news_data.csv")
-    upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
 
-'''     print(f"File saved to: {file_path}") '''
+    combined_df = pd.read_csv("combined_news_data.csv") '''
+    upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
+    '''print(f"File saved to: {file_path}") '''
 
 if __name__ == "__main__":
     main()
