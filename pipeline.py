@@ -4,6 +4,7 @@ from collections import Counter
 
 import pandas as pd
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from textblob import TextBlob
@@ -60,17 +61,19 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
     table = client.get_table(table_ref)
     print(f"Carga completada. La tabla {table_ref} ahora tiene {table.num_rows} filas.")
 
+
 def remove_date(text):
     """Remove date from the Title text."""
     return ' '.join(text.split()[1:])
 
 def extract_news_details(base_url, max_pages):
     """Extract news details from the given base URL up to the specified number of pages."""
+    service = Service()
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(service=service, options=options)
 
     page_url = base_url
 
@@ -130,12 +133,12 @@ def extract_news_details(base_url, max_pages):
 
 def get_category_links():
     """Get category links from the main page."""
+    service = Service()
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome(options=options)
-
+    driver = webdriver.Chrome(service=service, options=options)
     url = "https://www.yogonet.com/international/"
 
     # Open the URL
