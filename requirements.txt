@@ -4,3 +4,4 @@ selenium
 textblob
 google-cloud-bigquery
 fastapi
+uvicorn
