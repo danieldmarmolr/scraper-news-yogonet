@@ -8,6 +8,57 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from textblob import TextBlob
 
+from google.cloud import bigquery
+from google.oauth2 import service_account
+
+def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, credentials_path):
+    """
+    Elimina todos los datos de una tabla en BigQuery y luego sube un DataFrame de pandas.
+    
+    Args:
+        dataframe: El DataFrame de pandas con los datos a subir
+        project_id: ID del proyecto de Google Cloud
+        dataset_id: ID del dataset de BigQuery
+        table_id: ID de la tabla de BigQuery
+        credentials_path: Ruta al archivo credentials.json
+    """
+    # Configurar credenciales
+    credentials = service_account.Credentials.from_service_account_file(
+        credentials_path,
+        scopes=["https://www.googleapis.com/auth/cloud-platform"],
+    )
+    
+    # Inicializar cliente de BigQuery
+    client = bigquery.Client(credentials=credentials, project=project_id)
+    
+    # Especificar la tabla completa
+    table_ref = f"{project_id}.{dataset_id}.{table_id}"
+    print(f"Procesando tabla: {table_ref}")
+    
+    # Eliminar todos los datos de la tabla
+    query = f"DELETE FROM {table_ref} WHERE 1=1"
+    print("Eliminando datos existentes...")
+    query_job = client.query(query)
+    query_job.result()  # Esperar a que termine la operación
+    print("Datos eliminados correctamente")
+    
+    # Subir los datos del DataFrame
+    print("Cargando nuevos datos...")
+    job_config = bigquery.LoadJobConfig(
+        # Opciones para la carga: si la tabla debe crearse, reemplazarse, etc.
+        write_disposition="WRITE_APPEND",
+    )
+    
+    # Realizar la carga
+    job = client.load_table_from_dataframe(
+        dataframe, table_ref, job_config=job_config
+    )
+    job.result()  # Esperar a que termine la carga
+    
+    # Verificar resultados
+    table = client.get_table(table_ref)
+    print(f"Carga completada. La tabla {table_ref} ahora tiene {table.num_rows} filas.")
+
 def remove_date(text):
     """Remove date from the Title text."""
     return ' '.join(text.split()[1:])
@@ -198,7 +249,7 @@ def post_process_data(df):
 
 def main():
     """Main function to run the pipeline."""
-    # Call the function and display the list of URLs
+    '''# Call the function and display the list of URLs
     urls = get_category_links()
 
     # Initialize an empty DataFrame to store combined results
@@ -213,8 +264,11 @@ def main():
     # Save the DataFrame to a CSV file
     file_path = os.path.join(os.getcwd(), 'combined_news_data.csv')
     combined_df.to_csv(file_path, encoding='utf-8-sig', index=False)
+    '''
+    combined_df = pd.read_csv("combined_news_data.csv")
+    upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
 
-    print(f"File saved to: {file_path}")
+'''     print(f"File saved to: {file_path}") '''
 
 if __name__ == "__main__":
     main()
