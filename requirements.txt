@@ -1,6 +1,6 @@
-selenium==4.1.0
+selenium
 pandas==1.3.3
-webdriver-manager==3.5.2
+webdriver_manager
 textblob==0.15.3
 google-cloud-bigquery==2.30.1
 fastapi
