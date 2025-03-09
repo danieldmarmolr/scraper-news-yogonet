@@ -5,3 +5,4 @@ textblob==0.15.3
 google-cloud-bigquery==2.30.1
 fastapi
 uvicorn
+numpy==1.26.4
