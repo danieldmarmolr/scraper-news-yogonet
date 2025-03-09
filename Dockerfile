@@ -12,14 +12,14 @@ RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
 # Copy the requirements file into the container
 COPY requirements.txt .
 
-# Install the required packages
+# Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code into the container
 COPY . .
 
-# Set environment variables for BigQuery authentication
-ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+# Set the environment variable for the port
+ENV PORT 8080
 
-# Run the main script when the container starts
-CMD ["uvicorn","--host","0.0.0.0","--port","8080","main:app"]
+# Command to run the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
