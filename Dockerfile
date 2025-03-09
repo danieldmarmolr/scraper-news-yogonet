@@ -21,9 +21,11 @@ RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable 
 RUN apt-get update && apt-get install -y google-chrome-stable
 
 # Install a specific version of ChromeDriver (e.g., version 114.0.5735.90)
-RUN wget -q "https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip" \
-    && unzip chromedriver_linux64.zip -d /usr/local/bin/ \
-    && rm chromedriver_linux64.zip
+RUN wget -q https://storage.googleapis.com/chrome-for-testing-public/114.0.5735.90/linux64/chromedriver-linux64.zip \
+    && unzip chromedriver-linux64.zip \
+    && mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver \
+    && chmod +x /usr/local/bin/chromedriver \
+    && rm chromedriver-linux64.zip
 
 # Copy the requirements file into the container
 COPY requirements.txt .
@@ -34,8 +36,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code into the container
 COPY . .
 
-# Set environment variables for BigQuery authentication
+# Set environment variables for BigQuery authentication and ChromeDriver
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+ENV CHROMEDRIVER_PATH="/usr/local/bin/chromedriver"
 
 # Command to run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
