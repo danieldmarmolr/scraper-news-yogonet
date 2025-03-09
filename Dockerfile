@@ -1,11 +1,11 @@
-
 # Use the official Python image from the Docker Hub
 FROM python:3.9-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Install Chrome
+# Install wget and Chrome
+RUN apt-get update && apt-get install -y wget
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
 
