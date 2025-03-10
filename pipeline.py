@@ -31,80 +31,53 @@ def close_driver(driver):
 
 def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, credentials_path):
     """
-    Crea un dataset y una tabla en BigQuery si no existen, elimina todos los datos de la tabla,
-    y luego sube un DataFrame de pandas.
-    
+    Deletes all data from a table in BigQuery and then uploads a pandas DataFrame.
+
     Args:
-        dataframe: El DataFrame de pandas con los datos a subir
-        project_id: ID del proyecto de Google Cloud
-        dataset_id: ID del dataset de BigQuery
-        table_id: ID de la tabla de BigQuery
-        credentials_path: Ruta al archivo credentials.json
+        dataframe: The pandas DataFrame with the data to upload
+        project_id: Google Cloud project ID
+        dataset_id: BigQuery dataset ID
+        table_id: BigQuery table ID
+        credentials_path: Path to the credentials.json file
     """
-    # Configurar credenciales
+    # Configure credentials
     credentials = service_account.Credentials.from_service_account_file(
         credentials_path,
         scopes=["https://www.googleapis.com/auth/cloud-platform"],
     )
-    
-    # Inicializar cliente de BigQuery
+
+    # Initialize BigQuery client
     client = bigquery.Client(credentials=credentials, project=project_id)
-    
-    # Crear dataset si no existe
-    dataset_ref = client.dataset(dataset_id)
-    try:
-        client.get_dataset(dataset_ref)
-        print(f"El dataset {dataset_id} ya existe.")
-    except:
-        print(f"Creando el dataset {dataset_id}...")
-        dataset = bigquery.Dataset(dataset_ref)
-        dataset.location = "US"
-        client.create_dataset(dataset)
-        print(f"Dataset {dataset_id} creado exitosamente.")
-    
-    # Crear tabla si no existe
-    table_ref = dataset_ref.table(table_id)
-    try:
-        client.get_table(table_ref)
-        print(f"La tabla {table_id} ya existe.")
-    except:
-        print(f"Creando la tabla {table_id}...")
-        schema = []
-        for column in dataframe.columns:
-            schema.append(bigquery.SchemaField(column, bigquery.enums.SqlTypeNames.STRING))
-        
-        table = bigquery.Table(table_ref, schema=schema)
-        client.create_table(table)
-        print(f"Tabla {table_id} creada exitosamente.")
-    
-    # Especificar la referencia completa de la tabla
+
+    # Specify the full table reference
     table_ref = f"{project_id}.{dataset_id}.{table_id}"
-    print(f"Procesando la tabla: {table_ref}")
-    
-    # Eliminar todos los datos de la tabla
+    print(f"Processing table: {table_ref}")
+
+    # Delete all data from the table
     query = f"DELETE FROM {table_ref} WHERE 1=1"
-    print("Eliminando datos existentes...")
+    print("Deleting existing data...")
     query_job = client.query(query)
-    query_job.result()  # Esperar a que la operación se complete
+    query_job.result()  # Wait for the operation to complete
     dataframe["Date"] = pd.to_datetime(dataframe["Date"])
-    print("Datos eliminados exitosamente")
-    
-    # Subir los datos del DataFrame
-    print("Cargando nuevos datos...")
+    print("Data deleted successfully")
+
+    # Upload the DataFrame data
+    print("Loading new data...")
     job_config = bigquery.LoadJobConfig(
-        # Opciones de carga: si la tabla debe ser creada, reemplazada, etc.
+    # Load options: whether the table should be created, replaced, etc.
         write_disposition="WRITE_APPEND",
     )
-    
-    # Realizar la carga
+
+    # Perform the load
     job = client.load_table_from_dataframe(
         dataframe, table_ref, job_config=job_config
     )
-    job.result()  # Esperar a que la carga se complete
-    
-    # Verificar resultados
+    job.result()  # Wait for the load to complete
+
+    # Verify results
     table = client.get_table(table_ref)
-    print(f"Carga completada. La tabla {table_ref} ahora tiene {table.num_rows} filas.")
+    print(f"Load completed. The table {table_ref} now has {table.num_rows} rows.")
+
 
 def remove_date(text):
     """Remove date from the Title text."""
@@ -112,7 +85,7 @@ def remove_date(text):
 
 def extract_news_details(base_url, max_pages):
     """Extract news details from the given base URL up to the specified number of pages."""
-    
+
     driver = open_driver()
 
     page_url = base_url
@@ -172,9 +145,9 @@ def extract_news_details(base_url, max_pages):
 
 def get_category_links():
     """Get category links from the main page."""
-    
+
     driver = open_driver()
-    
+
     url = "https://www.yogonet.com/international/"
 
     # Open the URL
@@ -191,19 +164,19 @@ def get_category_links():
     links = [item.find_element(By.CSS_SELECTOR, 'a').get_attribute('href') for item in items]
 
     close_driver(driver)
-
-    return links[:1]
+    # Return only the links for categories
+    return links[:15]
 
 def extract_keywords(text, num_keywords=10):
     """Extract the most frequent keywords from a given text."""
     combined_text = re.sub(r'[^\w\s]', '', text).lower()
-    
+
     words = combined_text.split()
-    
+
     word_counts = Counter(words)
-    
+
     common_keywords = word_counts.most_common(num_keywords)
-    
+
     return [keyword for keyword, count in common_keywords]
 
 def post_process_data(df):
