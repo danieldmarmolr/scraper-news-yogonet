@@ -27,18 +27,21 @@ RUN wget -q https://storage.googleapis.com/chrome-for-testing-public/134.0.6998.
     && chmod +x /usr/local/bin/chromedriver \
     && rm chromedriver-linux64.zip
 
+# Verify the architecture of ChromeDriver
+RUN file /usr/local/bin/chromedriver
+
 # Copy the requirements file into the container
 COPY requirements.txt .
- 
+
 # Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code into the container
 COPY . .
 
-# Set environment variables for BigQuery authentication
+# Set environment variables for BigQuery authentication and ChromeDriver
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
-# ENV CHROMEDRIVER_PATH="/usr/local/bin/chromedriver"
+ENV CHROMEDRIVER_PATH="/usr/local/bin/chromedriver"
 
 # Command to run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
