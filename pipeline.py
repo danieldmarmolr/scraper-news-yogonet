@@ -61,7 +61,6 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
     table = client.get_table(table_ref)
     print(f"Carga completada. La tabla {table_ref} ahora tiene {table.num_rows} filas.")
 
-
 def remove_date(text):
     """Remove date from the Title text."""
     return ' '.join(text.split()[1:])
