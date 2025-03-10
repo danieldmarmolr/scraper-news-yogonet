@@ -19,7 +19,7 @@ def open_driver():
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(executable_path='/usr/local/bin/chromedriver', service=service, options=options)
     return driver
 
 def close_driver(driver):
@@ -274,7 +274,7 @@ def main():
     # combined_df.to_csv(file_path, encoding='utf-8-sig', index=False)
 
     combined_df = pd.read_csv("combined_news_data.csv") 
-    ''' upload_dataframe_to_bigquery(combined_df, "responsive-amp-453300-q1", "news", "news_yogonet", "credentials.json") '''
+    upload_dataframe_to_bigquery(combined_df, "responsive-amp-453300-q1", "news", "news_yogonet", "credentials.json")
     print(combined_df)
     
 if __name__ == "__main__":
