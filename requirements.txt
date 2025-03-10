@@ -7,3 +7,4 @@ fastapi
 uvicorn
 numpy==1.26.4
 lxml
+chromedriver-binary==77.0.3865.40.0
