@@ -4,6 +4,8 @@ from collections import Counter
 
 import pandas as pd
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -19,7 +21,8 @@ def open_driver():
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome(executable_path='/usr/local/bin/chromedriver', service=service, options=options)
+    # driver = webdriver.Chrome(executable_path='/usr/local/bin/chromedriver', service=service, options=options)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
     return driver
 
 def close_driver(driver):
@@ -28,52 +31,80 @@ def close_driver(driver):
 
 def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, credentials_path):
     """
-    Deletes all data from a table in BigQuery and then uploads a pandas DataFrame.
+    Crea un dataset y una tabla en BigQuery si no existen, elimina todos los datos de la tabla,
+    y luego sube un DataFrame de pandas.
     
     Args:
-        dataframe: The pandas DataFrame with the data to upload
-        project_id: Google Cloud project ID
-        dataset_id: BigQuery dataset ID
-        table_id: BigQuery table ID
-        credentials_path: Path to the credentials.json file
+        dataframe: El DataFrame de pandas con los datos a subir
+        project_id: ID del proyecto de Google Cloud
+        dataset_id: ID del dataset de BigQuery
+        table_id: ID de la tabla de BigQuery
+        credentials_path: Ruta al archivo credentials.json
     """
-    # Configure credentials
+    # Configurar credenciales
     credentials = service_account.Credentials.from_service_account_file(
         credentials_path,
         scopes=["https://www.googleapis.com/auth/cloud-platform"],
     )
     
-    # Initialize BigQuery client
+    # Inicializar cliente de BigQuery
     client = bigquery.Client(credentials=credentials, project=project_id)
     
-    # Specify the full table reference
+    # Crear dataset si no existe
+    dataset_ref = client.dataset(dataset_id)
+    try:
+        client.get_dataset(dataset_ref)
+        print(f"El dataset {dataset_id} ya existe.")
+    except:
+        print(f"Creando el dataset {dataset_id}...")
+        dataset = bigquery.Dataset(dataset_ref)
+        dataset.location = "US"
+        client.create_dataset(dataset)
+        print(f"Dataset {dataset_id} creado exitosamente.")
+    
+    # Crear tabla si no existe
+    table_ref = dataset_ref.table(table_id)
+    try:
+        client.get_table(table_ref)
+        print(f"La tabla {table_id} ya existe.")
+    except:
+        print(f"Creando la tabla {table_id}...")
+        schema = []
+        for column in dataframe.columns:
+            schema.append(bigquery.SchemaField(column, bigquery.enums.SqlTypeNames.STRING))
+        
+        table = bigquery.Table(table_ref, schema=schema)
+        client.create_table(table)
+        print(f"Tabla {table_id} creada exitosamente.")
+    
+    # Especificar la referencia completa de la tabla
     table_ref = f"{project_id}.{dataset_id}.{table_id}"
-    print(f"Processing table: {table_ref}")
+    print(f"Procesando la tabla: {table_ref}")
     
-    # Delete all data from the table
+    # Eliminar todos los datos de la tabla
     query = f"DELETE FROM {table_ref} WHERE 1=1"
-    print("Deleting existing data...")
+    print("Eliminando datos existentes...")
     query_job = client.query(query)
-    query_job.result()  # Wait for the operation to complete
+    query_job.result()  # Esperar a que la operación se complete
     dataframe["Date"] = pd.to_datetime(dataframe["Date"])
-    print("Data deleted successfully")
+    print("Datos eliminados exitosamente")
     
-    # Upload the DataFrame data
-    print("Loading new data...")
+    # Subir los datos del DataFrame
+    print("Cargando nuevos datos...")
     job_config = bigquery.LoadJobConfig(
-        # Load options: whether the table should be created, replaced, etc.
+        # Opciones de carga: si la tabla debe ser creada, reemplazada, etc.
         write_disposition="WRITE_APPEND",
     )
     
-    # Perform the load
+    # Realizar la carga
     job = client.load_table_from_dataframe(
         dataframe, table_ref, job_config=job_config
     )
-    job.result()  # Wait for the load to complete
+    job.result()  # Esperar a que la carga se complete
     
-    # Verify results
+    # Verificar resultados
     table = client.get_table(table_ref)
-    print(f"Load completed. The table {table_ref} now has {table.num_rows} rows.")
+    print(f"Carga completada. La tabla {table_ref} ahora tiene {table.num_rows} filas.")
 
 def remove_date(text):
     """Remove date from the Title text."""
@@ -270,12 +301,11 @@ def main():
     combined_df = post_process_data(combined_df)
 
     # Save the DataFrame to a CSV file
-    # file_path = os.path.join(os.getcwd(), 'combined_news_data.csv')
-    # combined_df.to_csv(file_path, encoding='utf-8-sig', index=False)
+    file_path = os.path.join(os.getcwd(), 'combined_news_data.csv')
+    combined_df.to_csv(file_path, encoding='utf-8-sig', index=False)
 
-    combined_df = pd.read_csv("combined_news_data.csv") 
+    # combined_df = pd.read_csv("combined_news_data.csv")
     upload_dataframe_to_bigquery(combined_df, "responsive-amp-453300-q1", "news", "news_yogonet", "credentials.json")
-    print(combined_df)
-    
+    # print(combined_df)
 if __name__ == "__main__":
     main()
