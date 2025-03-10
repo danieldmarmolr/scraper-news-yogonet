@@ -43,6 +43,10 @@ def close_driver(driver):
     """Close the Chrome WebDriver."""
     driver.quit()
 
+import pandas as pd
+from google.cloud import bigquery
+from google.oauth2 import service_account
+
 def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, credentials_path):
     """
     Deletes all data from a table in BigQuery and then uploads a pandas DataFrame.
@@ -54,9 +58,9 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
         table_id: BigQuery table ID
         credentials_path: Path to the credentials.json file
     """
-    # Configure credentials
-    credentials = service_account.Credentials.from_service_account_info(
-        service_account_info,
+    # Load credentials from the provided path
+    credentials = service_account.Credentials.from_service_account_file(
+        credentials_path,
         scopes=["https://www.googleapis.com/auth/cloud-platform"],
     )
 
@@ -75,10 +79,20 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
     dataframe["Date"] = pd.to_datetime(dataframe["Date"])
     print("Data deleted successfully")
 
+    # Convert list columns to bytes if necessary
+    for column in dataframe.columns:
+        if dataframe[column].apply(lambda x: isinstance(x, list)).any():
+            dataframe[column] = dataframe[column].apply(lambda x: bytes(str(x), 'utf-8'))
+
+    # Verificar la conversión a bytes
+    for column in dataframe.columns:
+        print(f"Column: {column}")
+        print(dataframe[column].head())
+
     # Upload the DataFrame data
     print("Loading new data...")
     job_config = bigquery.LoadJobConfig(
-    # Load options: whether the table should be created, replaced, etc.
+        # Load options: whether the table should be created, replaced, etc.
         write_disposition="WRITE_APPEND",
     )
 
