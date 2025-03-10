@@ -278,7 +278,7 @@ def main():
     combined_df.to_csv(file_path, encoding='utf-8-sig', index=False)
 
     combined_df = pd.read_csv("combined_news_data.csv")
-    # upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
+    upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
     print(combined_df)
 
 if __name__ == "__main__":
