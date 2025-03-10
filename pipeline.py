@@ -270,7 +270,7 @@ def main():
 
     # combined_df = pd.read_csv("combined_news_data.csv") 
     # upload_dataframe_to_bigquery(combined_df, "responsive-amp-453300-q1", "news", "news_yogonet", "credentials.json")
-    print(f"File saved to: {file_path}")
+    print(combined_df)
     
 if __name__ == "__main__":
     main()
