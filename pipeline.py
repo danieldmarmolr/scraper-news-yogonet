@@ -164,8 +164,8 @@ def get_category_links():
     links = [item.find_element(By.CSS_SELECTOR, 'a').get_attribute('href') for item in items]
 
     close_driver(driver)
-    # Return only the links for categories
-    return links[:16]
+    # Return only the links for 15 categories
+    return links[:1]
 
 def extract_keywords(text, num_keywords=10):
     """Extract the most frequent keywords from a given text."""
@@ -278,7 +278,7 @@ def main():
     combined_df.to_csv(file_path, encoding='utf-8-sig', index=False)
 
     combined_df = pd.read_csv("combined_news_data.csv")
-    # upload_dataframe_to_bigquery(combined_df, "responsive-amp-453300-q1", "news", "news_yogonet", "credentials.json")
+    # upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
     print(combined_df)
 
 if __name__ == "__main__":
