@@ -14,52 +14,52 @@ from google.oauth2 import service_account
 
 def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, credentials_path):
     """
-    Elimina todos los datos de una tabla en BigQuery y luego sube un DataFrame de pandas.
+    Deletes all data from a table in BigQuery and then uploads a pandas DataFrame.
     
     Args:
-        dataframe: El DataFrame de pandas con los datos a subir
-        project_id: ID del proyecto de Google Cloud
-        dataset_id: ID del dataset de BigQuery
-        table_id: ID de la tabla de BigQuery
-        credentials_path: Ruta al archivo credentials.json
+        dataframe: The pandas DataFrame with the data to upload
+        project_id: Google Cloud project ID
+        dataset_id: BigQuery dataset ID
+        table_id: BigQuery table ID
+        credentials_path: Path to the credentials.json file
     """
-    # Configurar credenciales
+    # Configure credentials
     credentials = service_account.Credentials.from_service_account_file(
         credentials_path,
         scopes=["https://www.googleapis.com/auth/cloud-platform"],
     )
     
-    # Inicializar cliente de BigQuery
+    # Initialize BigQuery client
     client = bigquery.Client(credentials=credentials, project=project_id)
     
-    # Especificar la tabla completa
+    # Specify the full table reference
     table_ref = f"{project_id}.{dataset_id}.{table_id}"
-    print(f"Procesando tabla: {table_ref}")
+    print(f"Processing table: {table_ref}")
     
-    # Eliminar todos los datos de la tabla
+    # Delete all data from the table
     query = f"DELETE FROM {table_ref} WHERE 1=1"
-    print("Eliminando datos existentes...")
+    print("Deleting existing data...")
     query_job = client.query(query)
-    query_job.result()  # Esperar a que termine la operación
+    query_job.result()  # Wait for the operation to complete
     dataframe["Date"] = pd.to_datetime(dataframe["Date"])
-    print("Datos eliminados correctamente")
+    print("Data deleted successfully")
     
-    # Subir los datos del DataFrame
-    print("Cargando nuevos datos...")
+    # Upload the DataFrame data
+    print("Loading new data...")
     job_config = bigquery.LoadJobConfig(
-        # Opciones para la carga: si la tabla debe crearse, reemplazarse, etc.
+        # Load options: whether the table should be created, replaced, etc.
         write_disposition="WRITE_APPEND",
     )
     
-    # Realizar la carga
+    # Perform the load
     job = client.load_table_from_dataframe(
         dataframe, table_ref, job_config=job_config
     )
-    job.result()  # Esperar a que termine la carga
+    job.result()  # Wait for the load to complete
     
-    # Verificar resultados
+    # Verify results
     table = client.get_table(table_ref)
-    print(f"Carga completada. La tabla {table_ref} ahora tiene {table.num_rows} filas.")
+    print(f"Load completed. The table {table_ref} now has {table.num_rows} rows.")
 
 def remove_date(text):
     """Remove date from the Title text."""
@@ -156,7 +156,7 @@ def get_category_links():
     # Close the WebDriver
     driver.quit()
 
-    return links[:4]
+    return links[:16]
 
 def extract_keywords(text, num_keywords=10):
     """Extract the most frequent keywords from a given text."""
@@ -264,13 +264,13 @@ def main():
 
     combined_df = post_process_data(combined_df)
 
-    ''' # Save the DataFrame to a CSV file
+    # Save the DataFrame to a CSV file
     file_path = os.path.join(os.getcwd(), 'combined_news_data.csv')
     combined_df.to_csv(file_path, encoding='utf-8-sig', index=False)
 
-    combined_df = pd.read_csv("combined_news_data.csv") '''
-    upload_dataframe_to_bigquery(combined_df, "responsive-amp-453300-q1", "news", "news_yogonet", "credentials.json")
-    '''print(f"File saved to: {file_path}") '''
-
+    # combined_df = pd.read_csv("combined_news_data.csv") 
+    # upload_dataframe_to_bigquery(combined_df, "responsive-amp-453300-q1", "news", "news_yogonet", "credentials.json")
+    print(f"File saved to: {file_path}")
+    
 if __name__ == "__main__":
     main()
