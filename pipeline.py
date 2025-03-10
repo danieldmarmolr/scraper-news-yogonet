@@ -14,6 +14,20 @@ from textblob import TextBlob
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
+service_account_info = {
+  "type": "service_account",
+  "project_id": "feisty-pottery-284800",
+  "private_key_id": os.environ.get('PRIVATE_KEY_ID'),
+  "private_key": os.environ.get('PRIVATE_KEY').replace('\\n','\n'),
+  "client_email": os.environ.get('CLIENT_EMAIL'),
+  "client_id": os.environ.get('CLIENT_ID'),
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": os.environ.get('CLIENT_X509_CERT_URL'),
+  "universe_domain": "googleapis.com"
+}
+
 def open_driver():
     """Open the Chrome WebDriver."""
     service = Service()
@@ -41,8 +55,8 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
         credentials_path: Path to the credentials.json file
     """
     # Configure credentials
-    credentials = service_account.Credentials.from_service_account_file(
-        credentials_path,
+    credentials = service_account.Credentials.from_service_account_info(
+        service_account_info,
         scopes=["https://www.googleapis.com/auth/cloud-platform"],
     )
 
@@ -273,13 +287,8 @@ def main():
 
     combined_df = post_process_data(combined_df)
 
-    # Save the DataFrame to a CSV file
-    file_path = os.path.join(os.getcwd(), 'combined_news_data.csv')
-    combined_df.to_csv(file_path, encoding='utf-8-sig', index=False)
-
-    combined_df = pd.read_csv("combined_news_data.csv")
+    # combined_df = pd.read_csv("combined_news_data.csv")
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
-    print(combined_df)
 
 if __name__ == "__main__":
     main()
