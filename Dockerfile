@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     xvfb \
     libxi6 \
     libgconf-2-4 \
+    file \
     && apt-get clean
 
 # Download and install Google Chrome from the provided URL
@@ -41,7 +42,7 @@ COPY . .
 
 # Set environment variables for BigQuery authentication and ChromeDriver
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
-ENV CHROMEDRIVER_PATH="/usr/local/bin/chromedriver"
+# ENV CHROMEDRIVER_PATH="/usr/local/bin/chromedriver"
 
 # Command to run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
