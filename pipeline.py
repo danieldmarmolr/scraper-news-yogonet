@@ -12,6 +12,20 @@ from textblob import TextBlob
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
+def open_driver():
+    """Open the Chrome WebDriver."""
+    service = Service()
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    driver = webdriver.Chrome(service=service, options=options)
+    return driver
+
+def close_driver(driver):
+    """Close the Chrome WebDriver."""
+    driver.quit()
+
 def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, credentials_path):
     """
     Deletes all data from a table in BigQuery and then uploads a pandas DataFrame.
@@ -67,12 +81,8 @@ def remove_date(text):
 
 def extract_news_details(base_url, max_pages):
     """Extract news details from the given base URL up to the specified number of pages."""
-    service = Service()
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome(service=service, options=options)
+    
+    driver = open_driver()
 
     page_url = base_url
 
@@ -112,8 +122,7 @@ def extract_news_details(base_url, max_pages):
         except:
             break
 
-    # Close the WebDriver
-    driver.quit()
+    close_driver(driver)
 
     # Create a DataFrame to store the details
     data = {
@@ -132,12 +141,9 @@ def extract_news_details(base_url, max_pages):
 
 def get_category_links():
     """Get category links from the main page."""
-    service = Service()
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Chrome(service=service, options=options)
+    
+    driver = open_driver()
+    
     url = "https://www.yogonet.com/international/"
 
     # Open the URL
@@ -153,10 +159,9 @@ def get_category_links():
     # Initialize list to store the links
     links = [item.find_element(By.CSS_SELECTOR, 'a').get_attribute('href') for item in items]
 
-    # Close the WebDriver
-    driver.quit()
+    close_driver(driver)
 
-    return links[:16]
+    return links[:1]
 
 def extract_keywords(text, num_keywords=10):
     """Extract the most frequent keywords from a given text."""
@@ -224,7 +229,7 @@ def post_process_data(df):
     # Character count in Kicker
     df['Character_Count_Kicker'] = df['Kicker'].apply(lambda x: len(x))
 
-    # List of words that start with a capital letter in Title
+    # List of words that start with a capital letter in Kicker
     df['Capital_Words_Kicker'] = df['Kicker'].apply(lambda x: [word for word in x.split() if word.istitle()])
 
     # Sentiment analysis on Title
@@ -265,11 +270,11 @@ def main():
     combined_df = post_process_data(combined_df)
 
     # Save the DataFrame to a CSV file
-    file_path = os.path.join(os.getcwd(), 'combined_news_data.csv')
-    combined_df.to_csv(file_path, encoding='utf-8-sig', index=False)
+    # file_path = os.path.join(os.getcwd(), 'combined_news_data.csv')
+    # combined_df.to_csv(file_path, encoding='utf-8-sig', index=False)
 
-    # combined_df = pd.read_csv("combined_news_data.csv") 
-    # upload_dataframe_to_bigquery(combined_df, "responsive-amp-453300-q1", "news", "news_yogonet", "credentials.json")
+    combined_df = pd.read_csv("combined_news_data.csv") 
+    ''' upload_dataframe_to_bigquery(combined_df, "responsive-amp-453300-q1", "news", "news_yogonet", "credentials.json") '''
     print(combined_df)
     
 if __name__ == "__main__":
