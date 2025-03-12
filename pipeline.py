@@ -302,7 +302,7 @@ def main():
 
     combined_df = post_process_data(combined_df)
 
-    combined_df = pd.read_csv("combined_news_data.csv")
+    # combined_df = pd.read_csv("combined_news_data.csv")
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
 
 if __name__ == "__main__":
