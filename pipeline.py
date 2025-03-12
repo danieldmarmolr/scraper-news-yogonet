@@ -16,7 +16,7 @@ from google.oauth2 import service_account
 
 service_account_info = {
     "type": "service_account",
-    "project_id": "responsive-amp-453300-q1",
+    "project_id": "feisty-pottery-284800",
     "private_key_id": os.environ.get('PRIVATE_KEY_ID'),
     "private_key": os.environ.get('PRIVATE_KEY').replace('\\n','\n'),
     "client_email": os.environ.get('CLIENT_EMAIL'),
@@ -306,7 +306,7 @@ def main():
     combined_df = pd.read_csv("combined_news_data.csv")
 
     # Upload the DataFrame to BigQuery
-    upload_dataframe_to_bigquery(combined_df, "responsive-amp-453300-q1", "news", "news_yogonet", "credentials.json")
+    upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
 
 if __name__ == "__main__":
     main()
