@@ -307,7 +307,7 @@ def main():
     combined_df = pd.read_csv("combined_news_data.csv")
 
     # Upload the DataFrame to BigQuery
-    upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
+    upload_dataframe_to_bigquery(combined_df, "responsive-amp-453300-q1", "news", "news_yogonet", "credentials.json")
 
 if __name__ == "__main__":
     main()
