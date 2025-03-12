@@ -15,19 +15,18 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 
 service_account_info = {
-   "type": "service_account",
-   "project_id": "responsive-amp-453300-q1",
-   "private_key_id": os.environ.get('PRIVATE_KEY_ID'),
-   "private_key": os.environ.get('PRIVATE_KEY').replace('\\n','\n'),
-   "client_email": os.environ.get('CLIENT_EMAIL'),
-   "client_id": os.environ.get('CLIENT_ID'),
-   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-   "token_uri": "https://oauth2.googleapis.com/token",
-   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-   "client_x509_cert_url": os.environ.get('CLIENT_X509_CERT_URL'),
-   "universe_domain": "googleapis.com"
- }
- 
+    "type": "service_account",
+    "project_id": "responsive-amp-453300-q1",
+    "private_key_id": os.environ.get('PRIVATE_KEY_ID'),
+    "private_key": os.environ.get('PRIVATE_KEY').replace('\\n','\n'),
+    "client_email": os.environ.get('CLIENT_EMAIL'),
+    "client_id": os.environ.get('CLIENT_ID'),
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": os.environ.get('CLIENT_X509_CERT_URL'),
+    "universe_domain": "googleapis.com"
+}
 
 def open_driver():
     """Open the Chrome WebDriver."""
@@ -36,7 +35,6 @@ def open_driver():
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    # driver = webdriver.Chrome(executable_path='/usr/local/bin/chromedriver', service=service, options=options)
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
     return driver
 
@@ -112,7 +110,7 @@ def remove_date(text):
     """Remove date from the Title text."""
     return ' '.join(text.split()[1:])
 
-def extract_news_details(base_url, max_pages=None):
+def extract_news_details(base_url, max_pages):
     """Extract news details from the given base URL up to the specified number of pages."""
     driver = open_driver()
     page_url = base_url
@@ -195,8 +193,8 @@ def get_category_links():
     links = [item.find_element(By.CSS_SELECTOR, 'a').get_attribute('href') for item in items]
 
     close_driver(driver)
-    # Return only the links for 15 categories
-    return links[:15]
+    # Return only the links for 1 categories
+    return links[:1]
 
 def extract_keywords(text, num_keywords=10):
     """Extract the most frequent keywords from a given text."""
@@ -289,19 +287,20 @@ def post_process_data(df):
     df['Title_Complexity'] = df['Title'].apply(calculate_complexity)
 
     return df
+
 def main():
     """Main function to run the pipeline."""
     # Call the function and display the list of URLs
-    # urls = get_category_links()
+    urls = get_category_links()
 
     # # Initialize an empty DataFrame to store combined results
-    # combined_df = pd.DataFrame()
+    combined_df = pd.DataFrame()
 
-    # for url in urls:
-    #     df = extract_news_details(url, max_pages=None)  # You can specify max_pages if desired
-    #     combined_df = pd.concat([combined_df, df], ignore_index=True)
+    for url in urls:
+        df = extract_news_details(url,1)  # You can specify max_pages if desired
+        combined_df = pd.concat([combined_df, df], ignore_index=True
 
-    # combined_df = post_process_data(combined_df)
+    combined_df = post_process_data(combined_df)
 
     # Read the combined data from CSV file
     combined_df = pd.read_csv("combined_news_data.csv")
