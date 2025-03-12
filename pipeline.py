@@ -292,16 +292,16 @@ def post_process_data(df):
 def main():
     """Main function to run the pipeline."""
     # Call the function and display the list of URLs
-    urls = get_category_links()
+    # urls = get_category_links()
 
-    # Initialize an empty DataFrame to store combined results
-    combined_df = pd.DataFrame()
+    # # Initialize an empty DataFrame to store combined results
+    # combined_df = pd.DataFrame()
 
-    for url in urls:
-        df = extract_news_details(url, max_pages=None)  # You can specify max_pages if desired
-        combined_df = pd.concat([combined_df, df], ignore_index=True)
+    # for url in urls:
+    #     df = extract_news_details(url, max_pages=None)  # You can specify max_pages if desired
+    #     combined_df = pd.concat([combined_df, df], ignore_index=True)
 
-    combined_df = post_process_data(combined_df)
+    # combined_df = post_process_data(combined_df)
 
     # Read the combined data from CSV file
     combined_df = pd.read_csv("combined_news_data.csv")
