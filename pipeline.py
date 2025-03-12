@@ -14,30 +14,20 @@ from textblob import TextBlob
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
-import json
-
-def create_credentials_file():
-    # Get the value of PRIVATE_KEY, defaulting to an empty string if not set
-    private_key = os.environ.get('PRIVATE_KEY', '')  
-
-    # Now replace newline characters if present
-    private_key = private_key.replace('\\n', '\n')  
-    
-    service_account_info = {
-        "type": "service_account",
-        "project_id": "feisty-pottery-284800",
-        "private_key_id": os.environ.get('PRIVATE_KEY_ID'),
-        "private_key": os.environ.get('PRIVATE_KEY'),
-        "client_email": os.environ.get('CLIENT_EMAIL'),
-        "client_id": os.environ.get('CLIENT_ID'),
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url": os.environ.get('CLIENT_X509_CERT_URL'),
-        "universe_domain": "googleapis.com"
-    }
-    with open('credentials.json', 'w') as jf:
-        json.dump(service_account_info, jf, ensure_ascii=False, indent=2)
+service_account_info = {
+   "type": "service_account",
+   "project_id": "feisty-pottery-284800",
+   "private_key_id": os.environ.get('PRIVATE_KEY_ID'),
+   "private_key": os.environ.get('PRIVATE_KEY').replace('\\n','\n'),
+   "client_email": os.environ.get('CLIENT_EMAIL'),
+   "client_id": os.environ.get('CLIENT_ID'),
+   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+   "token_uri": "https://oauth2.googleapis.com/token",
+   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+   "client_x509_cert_url": os.environ.get('CLIENT_X509_CERT_URL'),
+   "universe_domain": "googleapis.com"
+ }
+ 
 
 def open_driver():
     """Open the Chrome WebDriver."""
@@ -69,9 +59,9 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
         table_id: BigQuery table ID
         credentials_path: Path to the credentials.json file
     """
-    # Load credentials from the provided path
+    # Configure credentials
     credentials = service_account.Credentials.from_service_account_info(
-        credentials_path,
+        service_account_info,
         scopes=["https://www.googleapis.com/auth/cloud-platform"],
     )
 
