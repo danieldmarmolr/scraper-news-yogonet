@@ -289,7 +289,6 @@ def post_process_data(df):
     df['Title_Complexity'] = df['Title'].apply(calculate_complexity)
 
     return df
-
 def main():
     """Main function to run the pipeline."""
     # Call the function and display the list of URLs
@@ -304,7 +303,11 @@ def main():
 
     combined_df = post_process_data(combined_df)
 
+    # Read the combined data from CSV file
     combined_df = pd.read_csv("combined_news_data.csv")
+
+    # Upload the DataFrame to BigQuery
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
 
-if __name__
+if __name__ == "__main__":
+    main()
