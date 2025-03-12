@@ -112,11 +112,9 @@ def remove_date(text):
     """Remove date from the Title text."""
     return ' '.join(text.split()[1:])
 
-def extract_news_details(base_url):
+def extract_news_details(base_url, max_pages=None):
     """Extract news details from the given base URL up to the specified number of pages."""
-
     driver = open_driver()
-
     page_url = base_url
 
     # Initialize lists to store the details
@@ -152,6 +150,10 @@ def extract_news_details(base_url):
             page_number = int(page_url.split('=')[-1]) if '=' in page_url else 1
             page_url = f"{base_url}?buscar=&pagina={page_number + 1}"
             page_counter += 1
+
+            # If max_pages is set and reached, break the loop
+            if max_pages and page_counter >= max_pages:
+                break
         except:
             break
 
@@ -194,7 +196,7 @@ def get_category_links():
 
     close_driver(driver)
     # Return only the links for 15 categories
-    return links[:1]
+    return links[:15]
 
 def extract_keywords(text, num_keywords=10):
     """Extract the most frequent keywords from a given text."""
@@ -297,13 +299,12 @@ def main():
     combined_df = pd.DataFrame()
 
     for url in urls:
-        df = extract_news_details(url)
+        df = extract_news_details(url, max_pages=None)  # You can specify max_pages if desired
         combined_df = pd.concat([combined_df, df], ignore_index=True)
 
     combined_df = post_process_data(combined_df)
 
-    # combined_df = pd.read_csv("combined_news_data.csv")
+    combined_df = pd.read_csv("combined_news_data.csv")
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
 
-if __name__ == "__main__":
-    main()
+if __name__
