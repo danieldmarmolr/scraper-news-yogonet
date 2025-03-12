@@ -112,7 +112,7 @@ def remove_date(text):
     """Remove date from the Title text."""
     return ' '.join(text.split()[1:])
 
-def extract_news_details(base_url, max_pages):
+def extract_news_details(base_url):
     """Extract news details from the given base URL up to the specified number of pages."""
 
     driver = open_driver()
@@ -125,7 +125,7 @@ def extract_news_details(base_url, max_pages):
     # Initialize page counter
     page_counter = 0
 
-    while page_counter < max_pages:
+    while True:
         # Open the URL
         driver.get(page_url)
 
@@ -290,18 +290,17 @@ def post_process_data(df):
 
 def main():
     """Main function to run the pipeline."""
-    # create_credentials_file()
-    # # Call the function and display the list of URLs
-    # urls = get_category_links()
+    # Call the function and display the list of URLs
+    urls = get_category_links()
 
-    # # Initialize an empty DataFrame to store combined results
-    # combined_df = pd.DataFrame()
+    # Initialize an empty DataFrame to store combined results
+    combined_df = pd.DataFrame()
 
-    # for url in urls:
-    #     df = extract_news_details(url, max_pages=1)
-    #     combined_df = pd.concat([combined_df, df], ignore_index=True)
+    for url in urls:
+        df = extract_news_details(url)
+        combined_df = pd.concat([combined_df, df], ignore_index=True)
 
-    # combined_df = post_process_data(combined_df)
+    combined_df = post_process_data(combined_df)
 
     combined_df = pd.read_csv("combined_news_data.csv")
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
