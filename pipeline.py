@@ -14,19 +14,30 @@ from textblob import TextBlob
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
-service_account_info = {
-  "type": "service_account",
-  "project_id": "feisty-pottery-284800",
-  "private_key_id": os.environ.get('PRIVATE_KEY_ID'),
-  "private_key": os.environ.get('PRIVATE_KEY').replace('\\n','\n'),
-  "client_email": os.environ.get('CLIENT_EMAIL'),
-  "client_id": os.environ.get('CLIENT_ID'),
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": os.environ.get('CLIENT_X509_CERT_URL'),
-  "universe_domain": "googleapis.com"
-}
+import json
+
+def create_credentials_file():
+    # Get the value of PRIVATE_KEY, defaulting to an empty string if not set
+    private_key = os.environ.get('PRIVATE_KEY', '')  
+
+    # Now replace newline characters if present
+    private_key = private_key.replace('\\n', '\n')  
+    
+    service_account_info = {
+        "type": "service_account",
+        "project_id": "feisty-pottery-284800",
+        "private_key_id": os.environ.get('PRIVATE_KEY_ID'),
+        "private_key": os.environ.get('PRIVATE_KEY'),
+        "client_email": os.environ.get('CLIENT_EMAIL'),
+        "client_id": os.environ.get('CLIENT_ID'),
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": os.environ.get('CLIENT_X509_CERT_URL'),
+        "universe_domain": "googleapis.com"
+    }
+    with open('credentials.json', 'w') as jf:
+        json.dump(service_account_info, jf, ensure_ascii=False, indent=2)
 
 def open_driver():
     """Open the Chrome WebDriver."""
@@ -59,7 +70,7 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
         credentials_path: Path to the credentials.json file
     """
     # Load credentials from the provided path
-    credentials = service_account.Credentials.from_service_account_file(
+    credentials = service_account.Credentials.from_service_account_info(
         credentials_path,
         scopes=["https://www.googleapis.com/auth/cloud-platform"],
     )
@@ -289,17 +300,18 @@ def post_process_data(df):
 
 def main():
     """Main function to run the pipeline."""
-    # Call the function and display the list of URLs
-    urls = get_category_links()
+    # create_credentials_file()
+    # # Call the function and display the list of URLs
+    # urls = get_category_links()
 
-    # Initialize an empty DataFrame to store combined results
-    combined_df = pd.DataFrame()
+    # # Initialize an empty DataFrame to store combined results
+    # combined_df = pd.DataFrame()
 
-    for url in urls:
-        df = extract_news_details(url, max_pages=1)
-        combined_df = pd.concat([combined_df, df], ignore_index=True)
+    # for url in urls:
+    #     df = extract_news_details(url, max_pages=1)
+    #     combined_df = pd.concat([combined_df, df], ignore_index=True)
 
-    combined_df = post_process_data(combined_df)
+    # combined_df = post_process_data(combined_df)
 
     # combined_df = pd.read_csv("combined_news_data.csv")
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
