@@ -218,9 +218,9 @@ def get_category_links():
 
     close_driver(driver)
     # Return only the links for 15 categories
-    return links[:15]
+    return links[:16]
 
-def extract_keywords(text, num_keywords=10):
+def extract_keywords(text, num_keywords):
     """Extract the most frequent keywords from a given text."""
     combined_text = re.sub(r'[^\w\s]', '', text).lower()
 
@@ -321,7 +321,7 @@ def main():
     combined_df = pd.DataFrame()
 
     for url in urls:
-        df = extract_news_details(url,100)  # You can specify max_pages if desired
+        df = extract_news_details(url,None)  # You can specify max_pages if desired
         combined_df = pd.concat([combined_df, df], ignore_index=True)
 
     combined_df = post_process_data(combined_df)
