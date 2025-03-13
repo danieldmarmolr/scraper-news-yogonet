@@ -231,7 +231,6 @@ def extract_keywords(text, num_keywords):
     common_keywords = word_counts.most_common(num_keywords)
 
     return [keyword for keyword, count in common_keywords]
-
 def post_process_data(df):
     """Perform post-processing on the scraped data."""
 
@@ -265,8 +264,8 @@ def post_process_data(df):
         return analysis.sentiment.polarity
 
     # Extract keywords from all titles (maximum 10)
-    keywords_to_check_title = extract_keywords(' '.join(df['Title']))
-    keywords_to_check_kicker = extract_keywords(' '.join(df['Kicker']))
+    keywords_to_check_title = extract_keywords(' '.join(df['Title']), num_keywords=10)
+    keywords_to_check_kicker = extract_keywords(' '.join(df['Kicker']), num_keywords=10)
 
     def keyword_frequency(text, keywords):
         """Count frequency of specific keywords in the text."""
