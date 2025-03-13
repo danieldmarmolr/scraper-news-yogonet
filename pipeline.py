@@ -112,7 +112,9 @@ def remove_date(text):
 
 def extract_news_details(base_url, max_pages):
     """Extract news details from the given base URL up to the specified number of pages."""
+
     driver = open_driver()
+
     page_url = base_url
 
     # Initialize lists to store the details
@@ -121,7 +123,7 @@ def extract_news_details(base_url, max_pages):
     # Initialize page counter
     page_counter = 0
 
-    while True:
+    while  page_counter < max_pages:
         # Open the URL
         driver.get(page_url)
 
@@ -290,17 +292,17 @@ def post_process_data(df):
 
 def main():
     """Main function to run the pipeline."""
-    # Call the function and display the list of URLs
-    urls = get_category_links()
+    # # Call the function and display the list of URLs
+    # urls = get_category_links()
 
-    # # Initialize an empty DataFrame to store combined results
-    combined_df = pd.DataFrame()
+    # # # Initialize an empty DataFrame to store combined results
+    # combined_df = pd.DataFrame()
 
-    for url in urls:
-        df = extract_news_details(url,1)  # You can specify max_pages if desired
-        combined_df = pd.concat([combined_df, df], ignore_index=True
+    # for url in urls:
+    #     df = extract_news_details(url,1)  # You can specify max_pages if desired
+    #     combined_df = pd.concat([combined_df, df], ignore_index=True
 
-    combined_df = post_process_data(combined_df)
+    # combined_df = post_process_data(combined_df)
 
     # Read the combined data from CSV file
     combined_df = pd.read_csv("combined_news_data.csv")
