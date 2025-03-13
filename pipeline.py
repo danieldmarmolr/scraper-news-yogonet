@@ -299,13 +299,13 @@ def main():
     combined_df = pd.DataFrame()
 
     for url in urls:
-        df = extract_news_details(url,3)  # You can specify max_pages if desired
-        combined_df = pd.concat([combined_df, df], ignore_index=True
+        df = extract_news_details(url,1)  # You can specify max_pages if desired
+        combined_df = pd.concat([combined_df, df], ignore_index=True)
 
     combined_df = post_process_data(combined_df)
 
     # Read the combined data from CSV file
-    combined_df = pd.read_csv("combined_news_data.csv")
+    # combined_df = pd.read_csv("combined_news_data.csv")
 
     # Upload the DataFrame to BigQuery
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
