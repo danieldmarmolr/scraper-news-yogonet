@@ -331,4 +331,4 @@ def main():
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
 
 if __name__ == "__main__":
-    main() status
+    main()
