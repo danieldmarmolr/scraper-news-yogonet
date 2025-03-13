@@ -1,8 +1,9 @@
 import os
 import re
-from collections import Counter
-
+import json
 import pandas as pd
+
+from collections import Counter
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
@@ -42,10 +43,6 @@ def close_driver(driver):
     """Close the Chrome WebDriver."""
     driver.quit()
 
-import pandas as pd
-from google.cloud import bigquery
-from google.oauth2 import service_account
-
 def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, credentials_path):
     """
     Deletes all data from a table in BigQuery and then uploads a pandas DataFrame.
@@ -57,6 +54,10 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
         table_id: BigQuery table ID
         credentials_path: Path to the credentials.json file
     """
+    # Load credentials from the file
+    with open(credentials_path, 'r') as f:
+        service_account_info = json.load(f)
+
     # Configure credentials
     credentials = service_account.Credentials.from_service_account_info(
         service_account_info,
@@ -78,12 +79,12 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
     dataframe["Date"] = pd.to_datetime(dataframe["Date"])
     print("Data deleted successfully")
 
-    # Convert list columns to bytes if necessary
+    # Convert dictionary columns to bytes if necessary
     for column in dataframe.columns:
-        if dataframe[column].apply(lambda x: isinstance(x, list)).any():
-            dataframe[column] = dataframe[column].apply(lambda x: bytes(str(x), 'utf-8'))
+        if dataframe[column].apply(lambda x: isinstance(x, dict)).any():
+            dataframe[column] = dataframe[column].apply(lambda x: json.dumps(x).encode('utf-8'))
 
-    # Verificar la conversión a bytes
+    # Verify the conversion to bytes
     for column in dataframe.columns:
         print(f"Column: {column}")
         print(dataframe[column].head())
@@ -104,7 +105,6 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
     # Verify results
     table = client.get_table(table_ref)
     print(f"Load completed. The table {table_ref} now has {table.num_rows} rows.")
-
 
 def remove_date(text):
     """Remove date from the Title text."""
@@ -329,6 +329,3 @@ def main():
 
     # Upload the DataFrame to BigQuery
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
-
-if __name__ == "__main__":
-    main()

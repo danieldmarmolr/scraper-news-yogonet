@@ -10,3 +10,4 @@ lxml
 chromedriver-binary==77.0.3865.40.0
 webdriver-manager
 pyarrow
+google-auth
