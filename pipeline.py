@@ -195,8 +195,8 @@ def get_category_links():
     links = [item.find_element(By.CSS_SELECTOR, 'a').get_attribute('href') for item in items]
 
     close_driver(driver)
-    # Return only the links for 1 categories
-    return links[:1]
+    # Return only the links for 15 categories
+    return links[:15]
 
 def extract_keywords(text, num_keywords=10):
     """Extract the most frequent keywords from a given text."""
@@ -292,17 +292,17 @@ def post_process_data(df):
 
 def main():
     """Main function to run the pipeline."""
-    # # Call the function and display the list of URLs
-    # urls = get_category_links()
+    # Call the function and display the list of URLs
+    urls = get_category_links()
 
-    # # # Initialize an empty DataFrame to store combined results
-    # combined_df = pd.DataFrame()
+    # # Initialize an empty DataFrame to store combined results
+    combined_df = pd.DataFrame()
 
-    # for url in urls:
-    #     df = extract_news_details(url,1)  # You can specify max_pages if desired
-    #     combined_df = pd.concat([combined_df, df], ignore_index=True
+    for url in urls:
+        df = extract_news_details(url,3)  # You can specify max_pages if desired
+        combined_df = pd.concat([combined_df, df], ignore_index=True
 
-    # combined_df = post_process_data(combined_df)
+    combined_df = post_process_data(combined_df)
 
     # Read the combined data from CSV file
     combined_df = pd.read_csv("combined_news_data.csv")
