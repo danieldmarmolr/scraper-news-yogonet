@@ -123,7 +123,7 @@ def extract_news_details(base_url, max_pages):
     # Initialize page counter
     page_counter = 0
 
-    while  page_counter < max_pages:
+    while page_counter < max_pages:
         # Open the URL
         driver.get(page_url)
 
@@ -132,17 +132,37 @@ def extract_news_details(base_url, max_pages):
 
         # Iterate over each element and extract the necessary details
         for item in items:
-            title = item.find_element(By.CLASS_NAME, 'fuente_roboto_slab').text
-            kicker = item.find_element(By.TAG_NAME, 'a').get_attribute('title')
-            image = item.find_element(By.TAG_NAME, 'img').get_attribute('src')
-            link = item.find_element(By.TAG_NAME, 'a').get_attribute('href')
-            date = item.find_element(By.CLASS_NAME, 'fecha_item_listado_noticias').text
+            try:
+                title = item.find_element(By.CLASS_NAME, 'fuente_roboto_slab').text
+            except:
+                title = None
 
-            titles.append(title)
-            kickers.append(kicker)
-            images.append(image)
-            links.append(link)
-            dates.append(date)
+            try:
+                kicker = item.find_element(By.TAG_NAME, 'a').get_attribute('title')
+            except:
+                kicker = None
+
+            try:
+                image = item.find_element(By.TAG_NAME, 'img').get_attribute('src')
+            except:
+                image = None
+
+            try:
+                link = item.find_element(By.TAG_NAME, 'a').get_attribute('href')
+            except:
+                link = None
+
+            try:
+                date = item.find_element(By.CLASS_NAME, 'fecha_item_listado_noticias').text
+            except:
+                date = None
+
+            if title and kicker and image and link and date:
+                titles.append(title)
+                kickers.append(kicker)
+                images.append(image)
+                links.append(link)
+                dates.append(date)
 
         # Check if there is a "Next" button to go to the next page
         try:
@@ -311,4 +331,4 @@ def main():
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
 
 if __name__ == "__main__":
-    main()
+    main() status
