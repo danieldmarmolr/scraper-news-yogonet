@@ -231,6 +231,7 @@ def extract_keywords(text, num_keywords):
     common_keywords = word_counts.most_common(num_keywords)
 
     return [keyword for keyword, count in common_keywords]
+
 def post_process_data(df):
     """Perform post-processing on the scraped data."""
 
@@ -320,7 +321,7 @@ def main():
     combined_df = pd.DataFrame()
 
     for url in urls:
-        df = extract_news_details(url,None)  # You can specify max_pages if desired
+        df = extract_news_details(url,10)  # You can specify max_pages if desired
         combined_df = pd.concat([combined_df, df], ignore_index=True)
 
     combined_df = post_process_data(combined_df)
@@ -330,3 +331,6 @@ def main():
 
     # Upload the DataFrame to BigQuery
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
+
+if __name__ == "__main__":
+    main()
