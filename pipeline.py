@@ -54,6 +54,10 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
         table_id: BigQuery table ID
         credentials_path: Path to the credentials.json file
     """
+    # Load credentials from the file
+    with open(credentials_path, 'r') as f:
+        service_account_info = json.load(f)
+
     # Configure credentials
     credentials = service_account.Credentials.from_service_account_info(
         service_account_info,
@@ -78,6 +82,11 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
     # Convert dictionary columns to bytes if necessary
     for column in dataframe.columns:
         if dataframe[column].apply(lambda x: isinstance(x, dict)).any():
+            dataframe[column] = dataframe[column].apply(lambda x: json.dumps(x).encode('utf-8'))
+
+    # Convert list columns to bytes if necessary
+    for column in dataframe.columns:
+        if dataframe[column].apply(lambda x: isinstance(x, list)).any():
             dataframe[column] = dataframe[column].apply(lambda x: json.dumps(x).encode('utf-8'))
 
     # Verify the conversion to bytes
