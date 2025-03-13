@@ -54,7 +54,7 @@ def upload_dataframe_to_bigquery(dataframe, project_id, dataset_id, table_id, cr
         table_id: BigQuery table ID
         credentials_path: Path to the credentials.json file
     """
-    
+
     # Configure credentials
     credentials = service_account.Credentials.from_service_account_info(
         service_account_info,
@@ -321,7 +321,7 @@ def main():
     combined_df = pd.DataFrame()
 
     for url in urls:
-        df = extract_news_details(url,1)  # You can specify max_pages if desired
+        df = extract_news_details(url,100)  # You can specify max_pages if desired
         combined_df = pd.concat([combined_df, df], ignore_index=True)
 
     combined_df = post_process_data(combined_df)
