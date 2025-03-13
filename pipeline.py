@@ -125,7 +125,7 @@ def extract_news_details(base_url, max_pages):
     # Initialize page counter
     page_counter = 0
 
-    while page_counter < max_pages:
+    while max_pages is None or page_counter < max_pages:
         # Open the URL
         driver.get(page_url)
 
@@ -174,7 +174,7 @@ def extract_news_details(base_url, max_pages):
             page_counter += 1
 
             # If max_pages is set and reached, break the loop
-            if max_pages and page_counter >= max_pages:
+            if max_pages is not None and page_counter >= max_pages:
                 break
         except:
             break
