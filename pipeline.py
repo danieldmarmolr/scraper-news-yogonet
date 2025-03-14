@@ -319,7 +319,7 @@ def main():
     urls = get_category_links()
 
     # # Initialize an empty DataFrame to store combined results
-    combined_df = pd.DataFrame()
+    combined_df = pd.DataFrame() 
 
     for url in urls:
         df = extract_news_details(url,10)  # You can specify max_pages if desired
