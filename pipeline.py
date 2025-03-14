@@ -10,6 +10,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from textblob import TextBlob
 
 from google.cloud import bigquery
@@ -31,7 +33,6 @@ service_account_info = {
 
 def open_driver():
     """Open the Chrome WebDriver."""
-    service = Service()
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
@@ -129,6 +130,9 @@ def extract_news_details(base_url, max_pages):
         # Open the URL
         driver.get(page_url)
 
+        # Wait for the elements to be present
+        WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'item_noticias')))
+
         # Select all div elements with the class "item_noticias"
         items = driver.find_elements(By.CLASS_NAME, 'item_noticias')
 
@@ -168,7 +172,7 @@ def extract_news_details(base_url, max_pages):
 
         # Check if there is a "Next" button to go to the next page
         try:
-            next_button = driver.find_element(By.CLASS_NAME, 'boton_paginador siguiente')
+            next_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'boton_paginador.siguiente')))
             next_button.click()
             page_counter += 1
 
@@ -190,9 +194,6 @@ def extract_news_details(base_url, max_pages):
         'Link': links
     }
     df = pd.DataFrame(data)
-
-    # Apply the remove_date function to the 'Title' column
-    df['Title'] = df['Title'].apply(remove_date)
 
     return df
 
@@ -325,10 +326,7 @@ def main():
         combined_df = pd.concat([combined_df, df], ignore_index=True)
 
     combined_df = post_process_data(combined_df)
-
-    # Read the combined data from CSV file
-    # combined_df = pd.read_csv("combined_news_data.csv")
-
+    
     # Upload the DataFrame to BigQuery
     upload_dataframe_to_bigquery(combined_df, "feisty-pottery-284800", "news", "news_yogonet", "credentials.json")
 
