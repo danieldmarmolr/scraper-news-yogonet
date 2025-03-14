@@ -169,8 +169,7 @@ def extract_news_details(base_url, max_pages):
         # Check if there is a "Next" button to go to the next page
         try:
             next_button = driver.find_element(By.CLASS_NAME, 'boton_paginador siguiente')
-            page_number = int(page_url.split('=')[-1]) if '=' in page_url else 1
-            page_url = f"{base_url}?buscar=&pagina={page_number + 1}"
+            next_button.click()
             page_counter += 1
 
             # If max_pages is set and reached, break the loop
@@ -178,9 +177,10 @@ def extract_news_details(base_url, max_pages):
                 break
         except:
             break
-
-    close_driver(driver)
-
+        
+    # Close the WebDriver
+    driver.quit()
+    
     # Create a DataFrame to store the details
     data = {
         'Date': dates,
