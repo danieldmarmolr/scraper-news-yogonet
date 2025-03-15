@@ -131,10 +131,7 @@ def extract_news_details(base_url, max_pages):
         driver.get(page_url)
 
         # Wait for the elements to be present
-        WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'item_noticias')))
-
-        # Select all div elements with the class "item_noticias"
-        items = driver.find_elements(By.CLASS_NAME, 'item_noticias')
+        items = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'item_noticias')))
 
         # Iterate over each element and extract the necessary details
         for item in items:
@@ -322,7 +319,7 @@ def main():
     combined_df = pd.DataFrame() 
 
     for url in urls:
-        df = extract_news_details(url,10)  # You can specify max_pages if desired
+        df = extract_news_details(url,5)  # Reduce max_pages to 5 for optimization
         combined_df = pd.concat([combined_df, df], ignore_index=True)
 
     combined_df = post_process_data(combined_df)
