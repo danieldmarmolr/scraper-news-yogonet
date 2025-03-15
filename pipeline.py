@@ -131,7 +131,7 @@ def extract_news_details(base_url, max_pages):
         driver.get(page_url)
 
         # Wait for the elements to be present
-        items = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'item_noticias')))
+        items = WebDriverWait(driver, 20).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'item_noticias')))
 
         # Iterate over each element and extract the necessary details
         for item in items:
@@ -169,7 +169,7 @@ def extract_news_details(base_url, max_pages):
 
         # Check if there is a "Next" button to go to the next page
         try:
-            next_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'boton_paginador.siguiente')))
+            next_button = WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.CLASS_NAME, 'boton_paginador.siguiente')))
             next_button.click()
             page_counter += 1
 
@@ -319,7 +319,7 @@ def main():
     combined_df = pd.DataFrame() 
 
     for url in urls:
-        df = extract_news_details(url,5)  # Reduce max_pages to 5 for optimization
+        df = extract_news_details(url,2)  # Reduce max_pages to 2 for optimization
         combined_df = pd.concat([combined_df, df], ignore_index=True)
 
     combined_df = post_process_data(combined_df)
